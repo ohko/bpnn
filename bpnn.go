@@ -1,6 +1,9 @@
 package bpnn
 
 import (
+	"encoding/json"
+	"fmt"
+	"log"
 	"math"
 	"math/rand"
 )
@@ -121,8 +124,55 @@ func (o *BPNN) Train(input, output [][]float64, trainCount int) (float64, int) {
 		if min < 0.0001 {
 			return min, mm
 		}
+		log.Println(min)
 	}
 	return min, trainCount
+}
+
+// Check 检测
+func (o *BPNN) Check(input []float64) []float64 {
+	// 设置值
+	for k, v := range input {
+		o.Input[k].Value = v
+	}
+
+	// for nn := 0; nn < 1000; nn++ {
+	// 计算输入层->隐藏层
+	// log.Println("计算输入层->隐藏层")
+	calcForward(o.Input, o.Hidden[0], false)
+
+	// 计算隐藏层->隐藏层
+	// log.Println("计算隐藏层->隐藏层")
+	last := len(o.Hidden) - 1
+	if last >= 1 {
+		for idx := range o.Hidden[0:last] {
+			calcForward(o.Hidden[idx], o.Hidden[idx+1], false)
+		}
+	}
+
+	// 计算隐藏层->输出层
+	// log.Println("计算隐藏层->输出层")
+	calcForward(o.Hidden[last], o.Output, true)
+
+	output := []float64{}
+	for i := range o.Output {
+		output = append(output, o.Output[i].NewValue)
+	}
+
+	return output
+}
+
+func (o *BPNN) Export() string {
+	bs, _ := json.Marshal(o)
+	fmt.Println(string(bs))
+	return string(bs)
+}
+func (o *BPNN) Import(data string) error {
+	return json.Unmarshal([]byte(data), o)
+}
+func NewFromJSON(data string) (*BPNN, error) {
+	var o BPNN
+	return &o, json.Unmarshal([]byte(data), &o)
 }
 
 func (o *BPNN) train(input, output []float64) float64 {

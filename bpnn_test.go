@@ -84,4 +84,20 @@ func Test_1(t *testing.T) {
 
 	min, count := nn.Train(inputData, outputData, 100000)
 	log.Printf("min:%.8f count:%d\n", min, count)
+
+	jsonData := nn.Export()
+	nn.Import(jsonData)
+	log.Println(nn.Check([]float64{0, 0}))
+	log.Println(nn.Check([]float64{0, 1}))
+	log.Println(nn.Check([]float64{1, 0}))
+	log.Println(nn.Check([]float64{1, 1}))
+
+	newNN, err := NewFromJSON(jsonData)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Println(newNN.Check([]float64{0, 0}))
+	log.Println(newNN.Check([]float64{0, 1}))
+	log.Println(newNN.Check([]float64{1, 0}))
+	log.Println(newNN.Check([]float64{1, 1}))
 }
