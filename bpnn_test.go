@@ -2,6 +2,7 @@ package bpnn
 
 import (
 	"log"
+	"math"
 	"testing"
 )
 
@@ -100,4 +101,29 @@ func Test_1(t *testing.T) {
 	log.Println(newNN.Check([]float64{0, 1}))
 	log.Println(newNN.Check([]float64{1, 0}))
 	log.Println(newNN.Check([]float64{1, 1}))
+}
+
+// go test -timeout 1h -run ^Test_345$ bpnn -v -count=1
+func Test_345(t *testing.T) {
+	log.SetFlags(log.Flags() | log.Lshortfile)
+
+	nn, err := NewBPNN(2, 1, []int{3, 3}, 0.6, 0.0001)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	inputData := [][]float64{}
+	outputData := [][]float64{}
+	for x := 0.01; x < 0.1; x += 0.01 {
+		for y := 0.01; y < 0.1; y += 0.01 {
+			z := math.Sqrt(x*x + y + y)
+			inputData = append(inputData, []float64{x, y})
+			outputData = append(outputData, []float64{z})
+		}
+	}
+
+	min, count := nn.Train(inputData, outputData, 10000)
+	log.Printf("min:%.8f count:%d\n", min, count)
+
+	log.Println(nn.Check([]float64{0.3, 0.4}))
 }

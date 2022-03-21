@@ -109,24 +109,21 @@ func calcBackward(learn float64, input, output []Neure) {
 
 // Train 训练
 func (o *BPNN) Train(input, output [][]float64, trainCount int) (float64, int) {
-	min := 0.0
+	max := 0.0
 	for mm := 0; mm < trainCount; mm++ {
-		min = 0.0
+		max = 0.0
 		for i := range input {
 			result := o.train(input[i], output[i])
-			if min == 0 {
-				min = result
-			}
-			if result < min {
-				min = result
+			if result > max {
+				max = result
 			}
 		}
-		if min < 0.0001 {
-			return min, mm
+		if max < o.Diff {
+			return max, mm
 		}
-		log.Println(min)
+		log.Println(max)
 	}
-	return min, trainCount
+	return max, trainCount
 }
 
 // Check 检测
